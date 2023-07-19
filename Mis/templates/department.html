@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{%load crispy_forms_tags %} 
+{% block title %}Department{% endblock title %}
+{% block body %}
+<form action = "" method = "post">
+    {% csrf_token %}
+    {{departmentform |crispy }}
+    <input type="submit" value="Submit">
+</form>
+
+<div>
+<table class="table table-striped table-hover table-bordered">
+    <thead>
+      <tr>
+        <th scope="col">S.N</th>
+        <th scope="col">Department</th>
+        <th scope="col">Action</th>
+        
+      </tr>
+    </thead>
+    <tbody>
+        {% for ad in all_departments %}
+        <tr>
+        <th scope="row">{{forloop.counter}}</th>
+        <td>{{ad.name}}</td>
+        <td>
+          <a href="{% url 'department_detail' ad.id %}">
+            <button type="button" class="btn btn-sm btn-info">Detail</button>
+        </a>
+        
+            <a href="department_update/{{ad.id}}">
+              <button type="button" class="btn btn-sm btn-warning">Edit</button>
+          </a>
+            
+            <a href="department_delete/{{ad.id}}">
+                <button type="button" class="btn btn-sm btn-danger">Delete</button>
+            </a>
+            {% comment %} <button type="button" class="btn btn-sm btn-danger">Delete</button> {% endcomment %}
+
+        </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+{% endblock body %}
