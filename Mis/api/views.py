@@ -51,6 +51,43 @@ class StudentViewSet(viewsets.ModelViewSet):
     queryset=Student.objects.all().order_by('name')
     serializer_class=StudentSerializer
 
+
+    # This is for custom URL teacher/id/subjects/subject_id/students
+    @action(detail=True, methods=['get'])
+    def subject_students(self, request, pk=None, subject_id=None):
+        try:
+            teacher = Teacher.objects.get(pk=pk)
+            subject = teacher.subject.get(pk=subject_id)
+            students = Student.objects.filter(subjectstudent__subjectIns=subject)
+            students_serializer = StudentSerializer(students, many=True, context={'request': request})
+            return Response(students_serializer.data)
+        except Teacher.DoesNotExist:
+            return Response({'error': 'No such teacher found'})
+        except Subject.DoesNotExist:
+            return Response({'error': 'No such subject found'})
+        
+
+    # This is for custom URL teacher/id/subjects/subject_id/students/student_id/
+    @action(detail=True, methods=['get'])
+    def subject_student(self, request, pk=None, subject_id=None, student_id=None):
+        try:
+            teacher = Teacher.objects.get(pk=pk)
+            subject = teacher.subject.get(pk=subject_id)
+            student = Student.objects.get(pk=student_id)
+
+            student_serializer = StudentSerializer(student, context={'request': request})
+
+            
+            return Response(student_serializer.data)
+
+        except Teacher.DoesNotExist:
+            return Response({'error': 'No such teacher found'})
+        except Subject.DoesNotExist:
+            return Response({'error': 'No such subject found'})
+        except Student.DoesNotExist:
+            return Response({'error': 'No such student found'})
+
+
 class TeacherViewSet(viewsets.ModelViewSet):
     queryset=Teacher.objects.all().order_by('name')
     serializer_class=TeacherSerializer
@@ -64,6 +101,14 @@ class TeacherViewSet(viewsets.ModelViewSet):
             return Response(subjects_serializer.data)
         except Teacher.DoesNotExist:
             return Response({'error': 'No such teacher found'})
+
+
+    
+
+
+     
+
+        
 
 
 class SemesterViewSet(viewsets.ModelViewSet):
@@ -94,6 +139,20 @@ class SubjectViewSet(viewsets.ModelViewSet):
             students_serializer = StudentSerializer(students, many=True, context={'request': request})
             
             return Response(students_serializer.data)
+        except Subject.DoesNotExist:
+            return Response({'error': 'No such subject found'})
+
+
+    # This is for custom URL teacher/id/subjects/subject_id
+    @action(detail=True, methods=['get'])
+    def subject(self, request, pk=None, subject_id=None):
+        try:
+            teacher = Teacher.objects.get(pk=pk)
+            subject = teacher.subject.get(pk=subject_id)  # This line is updated
+            subject_serializer = SubjectSerializer(subject, context={'request': request})
+            return Response(subject_serializer.data)
+        except Teacher.DoesNotExist:
+            return Response({'error': 'No such teacher found'})
         except Subject.DoesNotExist:
             return Response({'error': 'No such subject found'})
 
@@ -130,6 +189,54 @@ class SubjectStudentViewSet(viewsets.ModelViewSet):
 class AttendanceViewSet(viewsets.ModelViewSet):
     queryset=Attendance.objects.all().order_by('subjectIns')
     serializer_class=AttendanceSerializer
+
+    # This is for custom URL teacher/id/subjects/subject_id/students/student_id/attendance/
+    @action(detail=True, methods=['get'])
+    def get_student_attendance(self, request, pk=None, subject_id=None, student_id=None):
+        try:
+            teacher = Teacher.objects.get(pk=pk)
+            subject = teacher.subject.get(pk=subject_id)
+            student = Student.objects.get(pk=student_id)
+
+            attendance_records = Attendance.objects.filter(subjectIns=subject, student=student)
+            attendance_serializer = AttendanceSerializer(attendance_records, many=True, context={'request': request})
+            return Response(attendance_serializer.data)
+
+        except Teacher.DoesNotExist:
+            return Response({'error': 'No such teacher found'})
+        except Subject.DoesNotExist:
+            return Response({'error': 'No such subject found'})
+        except Student.DoesNotExist:
+            return Response({'error': 'No such student found'})
+
+    # This is for custom URL teacher/id/subjects/subject_id/students/student_id/attendance/
+    @action(detail=True, methods=['post'])
+    def create_student_attendance(self, request, pk=None, subject_id=None, student_id=None):
+        try:
+            teacher = Teacher.objects.get(pk=pk)
+            subject = teacher.subject.get(pk=subject_id)
+            student = Student.objects.get(pk=student_id)
+
+            attendance_data = {
+                'subjectIns': subject.id,
+                'student': student.id,
+                'attendance_date': request.data.get('attendance_date'),
+                'type': request.data.get('type', '1'),  # Default type to 'Present' if not provided
+            }
+            attendance_serializer = AttendanceSerializer(data=attendance_data)
+            if attendance_serializer.is_valid():
+                attendance_serializer.save()
+                return Response(attendance_serializer.data)
+            else:
+                return Response(attendance_serializer.errors)
+
+        except Teacher.DoesNotExist:
+            return Response({'error': 'No such teacher found'})
+        except Subject.DoesNotExist:
+            return Response({'error': 'No such subject found'})
+        except Student.DoesNotExist:
+            return Response({'error': 'No such student found'})
+
 
 
 def Deletedepartments(request):

@@ -67,6 +67,7 @@ class Subject(models.Model):
 
     year=models.ForeignKey(Year,on_delete=models.CASCADE)
     semester=models.ManyToManyField(Semester)
+    # student = models.ForeignKey(Student, on_delete=models.CASCADE) 
     def __str__(self):
         return self.name
 

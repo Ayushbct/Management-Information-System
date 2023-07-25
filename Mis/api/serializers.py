@@ -1,5 +1,6 @@
 from rest_framework.serializers import *
 from .models import *
+from rest_framework import serializers
 # class YearSerializer(ModelSerializer):
 #     class Meta:
 #         model=Year
@@ -58,6 +59,8 @@ class SubjectStudentSerializer(HyperlinkedModelSerializer):
 
 class AttendanceSerializer(HyperlinkedModelSerializer):
     id=ReadOnlyField()
+    # subjectIns = serializers.PrimaryKeyRelatedField(queryset=Subject.objects.all())
+    # student = serializers.PrimaryKeyRelatedField(queryset=Student.objects.all())
     class Meta:
         model=Attendance
         fields='__all__'

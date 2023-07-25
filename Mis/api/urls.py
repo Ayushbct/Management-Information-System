@@ -23,6 +23,16 @@ urlpatterns = [
     # path('year/<str:pk>', views.getYear,name='year'),
     path('',include(router.urls)),
 
+    path('teachers/<int:pk>/subjects/', views.TeacherViewSet.as_view({'get': 'subjects'}), name='teacher-subjects'),
+
+    path('teachers/<int:pk>/subjects/<int:subject_id>/', views.SubjectViewSet.as_view({'get': 'subject'}), name='teacher-subject'),
+        
+    path('teachers/<int:pk>/subjects/<int:subject_id>/students/', views.StudentViewSet.as_view({'get': 'subject_students'}), name='teacher-subject-students'),
+    
+    path('teachers/<int:pk>/subjects/<int:subject_id>/students/<int:student_id>/', views.StudentViewSet.as_view({'get': 'subject_student'}), name='teacher-subject-student'),
+
+    path('teachers/<int:pk>/subjects/<int:subject_id>/students/<int:student_id>/attendance/', views.AttendanceViewSet.as_view({'get': 'get_student_attendance','post': 'create_student_attendance'}), name='teacher-subject-student-attendance'),
+
     path('deletedepartments/',views.Deletedepartments,name='deletedepartments'),
     path('deleteyears/',views.Deleteyears,name='deleteyears'),
     path('deletestudents/',views.Deletestudents,name='deletestudents'),
