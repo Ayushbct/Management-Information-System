@@ -48,7 +48,7 @@ class YearViewSet(viewsets.ModelViewSet):
 
 
 class StudentViewSet(viewsets.ModelViewSet):
-    queryset=Student.objects.all().order_by('name')
+    queryset=Student.objects.all()
     serializer_class=StudentSerializer
 
 
@@ -58,7 +58,9 @@ class StudentViewSet(viewsets.ModelViewSet):
         try:
             teacher = Teacher.objects.get(pk=pk)
             subject = teacher.subject.get(pk=subject_id)
-            students = Student.objects.filter(subjectstudent__subjectIns=subject)
+            
+            # students = Student.objects.filter(subjectstudent__subjectIns=subject)
+            students = Student.objects.filter(subject__pk=subject_id)
             students_serializer = StudentSerializer(students, many=True, context={'request': request})
             return Response(students_serializer.data)
         except Teacher.DoesNotExist:
@@ -89,7 +91,7 @@ class StudentViewSet(viewsets.ModelViewSet):
 
 
 class TeacherViewSet(viewsets.ModelViewSet):
-    queryset=Teacher.objects.all().order_by('name')
+    queryset=Teacher.objects.all()
     serializer_class=TeacherSerializer
     # This is for custom URL teacher/id/subjects
     @action(detail=True, methods=['get'])
@@ -112,7 +114,7 @@ class TeacherViewSet(viewsets.ModelViewSet):
 
 
 class SemesterViewSet(viewsets.ModelViewSet):
-    queryset=Semester.objects.all().order_by('name')
+    queryset=Semester.objects.all()
     serializer_class=SemesterSerializer
     # This is for custom URL semester/id/students
     @action(detail=True, methods=['get'])
@@ -158,7 +160,7 @@ class SubjectViewSet(viewsets.ModelViewSet):
 
 
 class CourseViewSet(viewsets.ModelViewSet):
-    queryset=Course.objects.all().order_by('name')
+    queryset=Course.objects.all()
     serializer_class=CourseSerializer
 
     # Custom URL course/id/years
@@ -184,10 +186,12 @@ class CourseViewSet(viewsets.ModelViewSet):
             return Response({'error': 'No such program found'})
 
 class SubjectStudentViewSet(viewsets.ModelViewSet):
-    queryset=SubjectStudent.objects.all().order_by('subjectIns')
+    queryset=SubjectStudent.objects.all()
     serializer_class=SubjectStudentSerializer
+
+
 class AttendanceViewSet(viewsets.ModelViewSet):
-    queryset=Attendance.objects.all().order_by('subjectIns')
+    queryset=Attendance.objects.all()
     serializer_class=AttendanceSerializer
 
     # This is for custom URL teacher/id/subjects/subject_id/students/student_id/attendance/
@@ -221,12 +225,13 @@ class AttendanceViewSet(viewsets.ModelViewSet):
                 'subjectIns': subject.id,
                 'student': student.id,
                 'attendance_date': request.data.get('attendance_date'),
-                'type': request.data.get('type', '1'),  # Default type to 'Present' if not provided
+                'attendance_status': request.data.get('attendance_status', '1'),  # Default attendance_status to 'Present' if not provided
             }
-            attendance_serializer = AttendanceSerializer(data=attendance_data)
+            attendance_serializer = AttendanceSerializer(data=attendance_data,many=False, context={'request': request})
             if attendance_serializer.is_valid():
                 attendance_serializer.save()
-                return Response(attendance_serializer.data)
+                return redirect('/api'+'/teachers/'+str(teacher.pk)+'/subjects/'+str(subject.pk)+'/students/'+str(student.pk)+'/attendance')
+                # return Response(attendance_serializer.data)
             else:
                 return Response(attendance_serializer.errors)
 

@@ -61,6 +61,24 @@ class AttendanceSerializer(HyperlinkedModelSerializer):
     id=ReadOnlyField()
     # subjectIns = serializers.PrimaryKeyRelatedField(queryset=Subject.objects.all())
     # student = serializers.PrimaryKeyRelatedField(queryset=Student.objects.all())
+    subjectIns = serializers.SlugRelatedField(
+         queryset= Subject.objects.all(),
+         slug_field='id'
+     )
+    student = serializers.SlugRelatedField(
+         queryset= Student.objects.all(),
+         slug_field='id'
+     )
+    # subjectIns = serializers.HyperlinkedRelatedField(
+    #     queryset=Subject.objects.all(),
+    #     view_name='subject-detail',
+    #     lookup_field='pk',   # Use 'pk' as the lookup field instead of 'slug' or any other field
+    # )
+    # student = serializers.HyperlinkedRelatedField(
+    #     queryset=Student.objects.all(),
+    #     view_name='student-detail',
+    #     lookup_field='pk',   # Use 'pk' as the lookup field instead of 'roll_no' or any other field
+    # )
     class Meta:
         model=Attendance
         fields='__all__'

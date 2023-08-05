@@ -67,7 +67,8 @@ class Subject(models.Model):
 
     year=models.ForeignKey(Year,on_delete=models.CASCADE)
     semester=models.ManyToManyField(Semester)
-    # student = models.ForeignKey(Student, on_delete=models.CASCADE) 
+    student = models.ManyToManyField(Student) 
+    
     def __str__(self):
         return self.name
 
@@ -82,7 +83,7 @@ class SubjectStudent(models.Model):
         student =  self.student
         _class =  self.subjectIns
         try:
-            present = Attendance.objects.filter(subjectIns= _class, student=student, type = 1).count()
+            present = Attendance.objects.filter(subjectIns= _class, student=student, attendance_status = 1).count()
             return present
         except:
             return 0
@@ -91,7 +92,7 @@ class SubjectStudent(models.Model):
         student =  self.student
         _class =  self.subjectIns
         try:
-            present = Attendance.objects.filter(subjectIns= _class, student=student, type = 2).count()
+            present = Attendance.objects.filter(subjectIns= _class, student=student, attendance_status = 2).count()
             return present
         except:
             return 0
@@ -100,7 +101,7 @@ class SubjectStudent(models.Model):
         student =  self.student
         _class =  self.subjectIns
         try:
-            present = Attendance.objects.filter(subjectIns= _class, student=student, type = 3).count()
+            present = Attendance.objects.filter(subjectIns= _class, student=student, attendance_status = 3).count()
             return present
         except:
             return 0
@@ -110,7 +111,7 @@ class Attendance(models.Model):
     subjectIns = models.ForeignKey(Subject,on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     attendance_date = models.DateField()
-    type = models.CharField(max_length=250, choices = [('1','Present'),('0.5','Late'),('0','Absent')] )
+    attendance_status = models.CharField(max_length=250, choices = [('1','Present'),('0.5','Late'),('0','Absent')] )
     date_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
