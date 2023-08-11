@@ -131,3 +131,32 @@ class Teacher(models.Model):
 
 
 
+
+class Routine(models.Model):
+    DAY_CHOICES = [
+        ('sun', 'Sunday'),
+        ('mon', 'Monday'),
+        ('tue', 'Tuesday'),
+        ('wed', 'Wednesday'),
+        ('thu', 'Thursday'),
+        ('fri', 'Friday'),
+    ]
+
+    SESSION_CHOICES = [
+        ('lecture', 'Lecture'),
+        ('lab', 'Lab'),
+        ('tutorial', 'Tutorial'),
+    ]
+
+    day = models.CharField(max_length=3, choices=DAY_CHOICES)
+    time_start = models.TimeField()
+    time_end = models.TimeField()
+    session_type = models.CharField(max_length=10, choices=SESSION_CHOICES)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    year = models.ForeignKey(Year, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    room_number = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"{self.teacher} - {self.subject} - {self.day} {self.time_start}-{self.time_end} ({self.session_type})"

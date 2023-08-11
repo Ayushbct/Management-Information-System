@@ -351,3 +351,52 @@ def update_student(request, id):
     return render(request, 'update_student.html', context)
 
 
+
+
+
+def routine(request):
+    context ={}
+    all_routines=Routine.objects.all()
+    # context['routineform']= routineForm()
+    context={
+        'routineform':RoutineForm(),
+        'all_routines':all_routines,
+    }
+    if request.method == 'POST':
+        form=RoutineForm(request.POST)
+        
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'routine has been saved successfully')
+            
+        else:
+            messages.error(request, 'routine cannot be saved') 
+        
+    return render(request, "routine.html", context)
+
+def routine_delete(request,id):
+    
+    routine=Routine.objects.get(pk=id)
+    routine.delete()
+    return redirect('/routine')
+
+def update_routine(request, id):
+    routine = Routine.objects.get(pk=id)
+
+    if request.method == 'POST':
+        form = RoutineForm(request.POST, instance=routine)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'routine has been updated successfully')
+            return redirect('/routine')
+        else:
+            messages.error(request, 'routine could not be updated')
+
+    else:
+        form = RoutineForm(instance=routine)
+
+    context = {
+        'form': form,
+        'routine': routine
+    }
+    return render(request, 'update_routine.html', context)

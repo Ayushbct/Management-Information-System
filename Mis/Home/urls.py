@@ -49,4 +49,9 @@ urlpatterns = [
     path('student_update/<int:id>', views.update_student, name='student_update'),
 
 
+    path('routine', views.routine,name='routine'),
+    path('routine_delete/<int:id>', views.routine_delete,name='routine_delete'),
+    path('routine_update/<int:id>', views.update_routine, name='routine_update'),
+
+
 ]

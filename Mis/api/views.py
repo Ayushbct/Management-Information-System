@@ -3,6 +3,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view,action
 from .models import *
 from .serializers import *
+from django.db.models import Q
+from datetime import datetime, timedelta
+from rest_framework import status
 # Create your views here.
 # @api_view(['GET'])
 # def getRoutes(Request):
@@ -103,13 +106,6 @@ class TeacherViewSet(viewsets.ModelViewSet):
             return Response(subjects_serializer.data)
         except Teacher.DoesNotExist:
             return Response({'error': 'No such teacher found'})
-
-
-    
-
-
-     
-
         
 
 
@@ -241,6 +237,90 @@ class AttendanceViewSet(viewsets.ModelViewSet):
             return Response({'error': 'No such subject found'})
         except Student.DoesNotExist:
             return Response({'error': 'No such student found'})
+
+
+# class RoutineViewSet(viewsets.ModelViewSet):
+#     queryset=Routine.objects.all()
+#     serializer_class=RoutineSerializer
+#     def create(self, request, *args, **kwargs):
+#         # Extract relevant data from the request
+#         teacher_id = request.data.get('teacher')
+#         day = request.data.get('day')
+#         time_start = request.data.get('time_start')
+#         time_end = request.data.get('time_end')
+
+#         # Check if a routine with the same teacher, day, and overlapping time exists
+#         overlapping_routines = Routine.objects.filter(
+#             teacher=teacher_id,
+#             day=day,
+#             time_start__lt=time_end,
+#             time_end__gt=time_start
+#         )
+
+#         if overlapping_routines.exists():
+#             return Response(
+#                 {'detail': 'A routine with the same teacher, day, and overlapping time already exists.'},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+
+#         # If no overlapping routine found, proceed with creating the routine
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         self.perform_create(serializer)
+#         headers = self.get_success_headers(serializer.data)
+
+#         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+
+class RoutineViewSet(viewsets.ModelViewSet):
+    queryset = Routine.objects.all()
+    serializer_class = RoutineSerializer
+
+    def create(self, request, *args, **kwargs):
+        # Extract relevant data from the request
+        teacher_id = request.data.get('teacher')
+        room_number = request.data.get('room_number')
+        day = request.data.get('day')
+        time_start = request.data.get('time_start')
+        time_end = request.data.get('time_end')
+
+        # Check if a routine with the same room, day, and overlapping time exists
+        overlapping_routines = Routine.objects.filter(
+            room_number=room_number,
+            day=day,
+            time_start__lt=time_end,
+            time_end__gt=time_start
+        )
+
+        if overlapping_routines.exists():
+            return Response(
+                {'detail': 'The room is already allocated to another teacher for the same day and time.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Check if a routine with the same teacher, day, and overlapping time exists
+        overlapping_routines_teacher = Routine.objects.filter(
+            teacher=teacher_id,
+            day=day,
+            time_start__lt=time_end,
+            time_end__gt=time_start
+        )
+
+        if overlapping_routines_teacher.exists():
+            return Response(
+                {'detail': 'A routine with the same teacher, day, and overlapping time already exists.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # If no overlapping routine found, proceed with creating the routine
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
 
 
 

@@ -40,3 +40,10 @@ class StudentForm(forms.ModelForm):
     class Meta:
         model = api.Student
         fields = "__all__"
+
+
+class RoutineForm(forms.ModelForm):
+    # specify the name of model to use
+    class Meta:
+        model = api.Routine
+        fields = "__all__"

@@ -13,7 +13,7 @@ router.register(r'subjects',views.SubjectViewSet)
 router.register(r'courses',views.CourseViewSet)
 router.register(r'subjectstudents',views.SubjectStudentViewSet)
 router.register(r'attendances',views.AttendanceViewSet)
-
+router.register(r'routines', views.RoutineViewSet)
 
 
 urlpatterns = [
@@ -22,6 +22,10 @@ urlpatterns = [
     # path('year', views.getYears,name='years'),
     # path('year/<str:pk>', views.getYear,name='year'),
     path('',include(router.urls)),
+    # path('routines/create_routine/', views.RoutineViewSet.as_view({'post': 'create_routine'}), name='create-routine'),
+
+    # URL to retrieve all routines
+    # path('routines/', views.RoutineViewSet.as_view({'get': 'create_routine','post': 'create_routine'}), name='list-routines'),
 
     path('teachers/<int:pk>/subjects/', views.TeacherViewSet.as_view({'get': 'subjects'}), name='teacher-subjects'),
 
