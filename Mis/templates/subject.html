@@ -5,7 +5,7 @@
 <form action = "" method = "post">
     {% csrf_token %}
     {{subjectform |crispy }}
-    <input attendance_status="submit" value="Submit">
+    <input type="submit" value="Submit">
 </form>
 
 <div>
@@ -25,17 +25,17 @@
         <td>{{as.name}}</td>
         <td>
           {% comment %} <a href="{% url 'subject_detail' as.id %}">
-            <button attendance_status="button" class="btn btn-sm btn-info">Detail</button>
+            <button type="button" class="btn btn-sm btn-info">Detail</button>
         </a> {% endcomment %}
         
             <a href="subject_update/{{as.id}}">
-              <button attendance_status="button" class="btn btn-sm btn-warning">Edit</button>
+              <button type=s="btn btn-sm btn-warning">Edit</button>
           </a>
             
             <a href="subject_delete/{{as.id}}">
-                <button attendance_status="button" class="btn btn-sm btn-danger">Delete</button>
+                <button type="button" class="btn btn-sm btn-danger">Delete</button>
             </a>
-            {% comment %} <button attendance_status="button" class="btn btn-sm btn-danger">Delete</button> {% endcomment %}
+            {% comment %} <button type="button" class="btn btn-sm btn-danger">Delete</button> {% endcomment %}
 
         </td>
         </tr>

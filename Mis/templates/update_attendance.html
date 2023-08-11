@@ -5,6 +5,6 @@
 <form action = "" method = "post">
     {% csrf_token %}
     {{form |crispy }}
-    <input attendance_status="submit" value="Submit">
+    <input type="submit" value="Submit">
 </form>
 {% endblock body %}
