@@ -321,7 +321,43 @@ class RoutineViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
+    # For example: /api/routines/get_routines_by_teacher_and_room/?teacher_id=1&room_number=101
+    @action(detail=False, methods=['GET'])
+    def get_routines_by_teacher_and_room(self, request):
+        teacher_id = request.query_params.get('teacher_id')
+        room_number = request.query_params.get('room_number')
 
+        routines = Routine.objects.filter(
+            teacher_id=teacher_id,
+            room_number=room_number
+        )
+
+        serializer = self.get_serializer(routines, many=True)
+        return Response(serializer.data)
+    # For example: /api/routines/get_routines_by_teacher/?teacher_id=1
+    @action(detail=False, methods=['GET'])
+    def get_routines_by_teacher(self, request):
+        teacher_id = request.query_params.get('teacher_id')
+
+        routines = Routine.objects.filter(
+            teacher_id=teacher_id
+        )
+
+        serializer = self.get_serializer(routines, many=True)
+        return Response(serializer.data)
+
+
+    # For example: /api/routines/get_routines_by_room/?room_number=101
+    @action(detail=False, methods=['GET'])
+    def get_routines_by_room(self, request):
+        room_number = request.query_params.get('room_number')
+
+        routines = Routine.objects.filter(
+            room_number=room_number
+        )
+
+        serializer = self.get_serializer(routines, many=True)
+        return Response(serializer.data)
 
 
 def Deletedepartments(request):
