@@ -358,6 +358,21 @@ class RoutineViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(routines, many=True)
         return Response(serializer.data)
+    
+    # For example: /api/routines/get_routines_by_course_and_year/?course_id=3&year=4
+    @action(detail=False, methods=['GET'])
+    def get_routines_by_course_and_year(self, request):
+        course_id = request.query_params.get('course_id')
+        year = request.query_params.get('year')
+
+        routines = Routine.objects.filter(
+            course_id=course_id,
+            year=year
+        )
+
+        serializer = self.get_serializer(routines, many=True)
+        return Response(serializer.data)
+
 
 
 def Deletedepartments(request):

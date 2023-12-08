@@ -86,21 +86,21 @@ class AttendanceSerializer(HyperlinkedModelSerializer):
 
 
 class RoutineSerializer(HyperlinkedModelSerializer):
-    teacher = serializers.SlugRelatedField(
+    teacher = serializers.SlugRelatedField(many=True,
          queryset= Teacher.objects.all(),
-         slug_field='id'
+         slug_field='name'
      )
     subject = serializers.SlugRelatedField(
          queryset= Subject.objects.all(),
-         slug_field='id'
+         slug_field='name'
      )
     year = serializers.SlugRelatedField(
          queryset= Year.objects.all(),
-         slug_field='id'
+         slug_field='year'
      )
     course = serializers.SlugRelatedField(
          queryset= Course.objects.all(),
-         slug_field='id'
+         slug_field='name'
      )
     class Meta:
         model = Routine

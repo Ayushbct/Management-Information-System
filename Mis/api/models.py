@@ -1,6 +1,19 @@
 from django.db import models
 
 # Create your models here.
+from django.db import models
+from django.contrib.auth.models import User
+
+from datetime import date
+
+# Extending User Model Using a One-To-One Link
+class Profile(models.Model):
+    user = models.OneToOneField(User,null=True,blank=True, on_delete=models.CASCADE)
+    file_user = models.FileField( upload_to='profile/uploaded_files/',null=True,blank=True, max_length=100)
+    
+
+    def __str__(self):
+        return self.user.username
 
 class Department(models.Model):
     name = models.CharField(max_length=250)    
@@ -152,11 +165,11 @@ class Routine(models.Model):
     time_start = models.TimeField()
     time_end = models.TimeField()
     session_type = models.CharField(max_length=10, choices=SESSION_CHOICES)
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    teacher = models.ManyToManyField(Teacher)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
     year = models.ForeignKey(Year, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     room_number = models.CharField(max_length=50)
 
     def __str__(self):
-        return f"{self.teacher} - {self.subject} - {self.day} {self.time_start}-{self.time_end} ({self.session_type})"
+        return f"{self.year} - {self.subject} - {self.day} {self.time_start}-{self.time_end} ({self.session_type})"
