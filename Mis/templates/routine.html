@@ -2,7 +2,7 @@
 {%load crispy_forms_tags %} 
 {% block title %}routine{% endblock title %}
 {% block body %}
-<form action = "" method = "post">
+<form action = "{% url 'routine' %}" method = "post">
     {% csrf_token %}
     {{routineform |crispy }}
     <input type="submit" value="Submit">
@@ -34,7 +34,11 @@
         <td>{{as.time_start}}</td>
         <td>{{as.time_end}}</td>
         <td>{{as.session_type}}</td>
-        <td>{{as.teacher}}</td>
+        <td>{% for t in as.teacher.all %}
+          
+          {{t}}
+          {% endfor %}
+        </td>
         <td>{{as.subject}}</td>
         <td>{{as.year}}</td>
         <td>{{as.course}}</td>
