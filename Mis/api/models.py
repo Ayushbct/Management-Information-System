@@ -79,8 +79,8 @@ class Subject(models.Model):
     name=models.CharField(max_length=100,unique=True)
 
     year=models.ForeignKey(Year,on_delete=models.CASCADE)
-    semester=models.ManyToManyField(Semester)
-    student = models.ManyToManyField(Student) 
+    # semester=models.ManyToManyField(Semester)
+    # student = models.ManyToManyField(Student) 
     
     def __str__(self):
         return self.name
@@ -137,7 +137,7 @@ class Teacher(models.Model):
     email=models.EmailField(max_length=254)
     address=models.CharField(max_length=100)
     phone=models.CharField(max_length=15,unique=True)
-    subject=models.ManyToManyField(Subject)
+    # subject=models.ManyToManyField(Subject)
     def __str__(self):
         return self.name
     
@@ -162,8 +162,8 @@ class Routine(models.Model):
     ]
 
     day = models.CharField(max_length=3, choices=DAY_CHOICES)
-    time_start = models.TimeField()
-    time_end = models.TimeField()
+    time_start = models.CharField(max_length=10,blank=True)
+    time_end = models.CharField(max_length=10,blank=True)
     session_type = models.CharField(max_length=10, choices=SESSION_CHOICES)
     teacher = models.ManyToManyField(Teacher)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)

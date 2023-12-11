@@ -470,6 +470,7 @@ def update_student(request, id):
 
 
 def routine(request):
+    
     context ={}
     all_routines=Routine.objects.all()
     # context['routineform']= routineForm()
@@ -480,7 +481,7 @@ def routine(request):
     if request.method == 'POST':
         form=RoutineForm(request.POST)
         
-        if form.is_valid():
+        if form.is_valid():    
             form.save()
             messages.success(request, 'routine has been saved successfully')
             

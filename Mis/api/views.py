@@ -239,37 +239,6 @@ class AttendanceViewSet(viewsets.ModelViewSet):
             return Response({'error': 'No such student found'})
 
 
-# class RoutineViewSet(viewsets.ModelViewSet):
-#     queryset=Routine.objects.all()
-#     serializer_class=RoutineSerializer
-#     def create(self, request, *args, **kwargs):
-#         # Extract relevant data from the request
-#         teacher_id = request.data.get('teacher')
-#         day = request.data.get('day')
-#         time_start = request.data.get('time_start')
-#         time_end = request.data.get('time_end')
-
-#         # Check if a routine with the same teacher, day, and overlapping time exists
-#         overlapping_routines = Routine.objects.filter(
-#             teacher=teacher_id,
-#             day=day,
-#             time_start__lt=time_end,
-#             time_end__gt=time_start
-#         )
-
-#         if overlapping_routines.exists():
-#             return Response(
-#                 {'detail': 'A routine with the same teacher, day, and overlapping time already exists.'},
-#                 status=status.HTTP_400_BAD_REQUEST
-#             )
-
-#         # If no overlapping routine found, proceed with creating the routine
-#         serializer = self.get_serializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         self.perform_create(serializer)
-#         headers = self.get_success_headers(serializer.data)
-
-#         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 
@@ -279,11 +248,40 @@ class RoutineViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         # Extract relevant data from the request
+        winter_period_time = ['10:15', '11:00', '11:45', '12:30', '1:00', '1:45', '2:30', '3:15', '4:00','4:15','5:00']
+        summer_period_time = ['10:15', '11:05', '11:55', '12:45', '1:35', '2:25', '3:15', '4:05', '4:55','5:45','6:35']
+        # # Convert string representations to time objects
+        # winter_time_objects = [datetime.strptime(time_str, '%H:%M').time() for time_str in winter_period_time]
+        # summer_time_objects = [datetime.strptime(time_str, '%H:%M').time() for time_str in summer_period_time]
+
+        season=request.data.get('season')
+        starting_period_value = request.data.get('starting_period')
+        no_of_period_value = request.data.get('no_of_period')
+        # season='summer'
+        # starting_period_value = int(8)
+        # no_of_period_value = int(1)
+        ending_period_value = starting_period_value + no_of_period_value
+        if season == 'winter':
+            period_time = winter_period_time
+        elif season == 'summer':
+            period_time = summer_period_time
+        else:
+            print("Invalid season.")
+            period_time = []
+        # Create period_mapping dynamically using a loop
+        period_mapping = {}
+        for index, time in enumerate(period_time):
+            period_mapping[index + 1] = time
+
+        # Get the starting time and ending time based on the input value
+        time_start = period_mapping.get(starting_period_value)
+        time_end = period_mapping.get(ending_period_value)
+
         teacher_id = request.data.get('teacher')
         room_number = request.data.get('room_number')
         day = request.data.get('day')
-        time_start = request.data.get('time_start')
-        time_end = request.data.get('time_end')
+        # time_start = request.data.get('time_start')
+        # time_end = request.data.get('time_end')
 
         # Check if a routine with the same room, day, and overlapping time exists
         overlapping_routines = Routine.objects.filter(
@@ -340,7 +338,7 @@ class RoutineViewSet(viewsets.ModelViewSet):
         teacher_id = request.query_params.get('teacher_id')
 
         routines = Routine.objects.filter(
-            teacher_id=teacher_id
+            teacher=teacher_id
         )
 
         serializer = self.get_serializer(routines, many=True)
