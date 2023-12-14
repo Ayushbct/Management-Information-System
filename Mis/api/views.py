@@ -6,6 +6,7 @@ from .serializers import *
 from django.db.models import Q
 from datetime import datetime, timedelta
 from rest_framework import status
+from django.shortcuts import get_object_or_404
 # Create your views here.
 # @api_view(['GET'])
 # def getRoutes(Request):
@@ -240,48 +241,52 @@ class AttendanceViewSet(viewsets.ModelViewSet):
 
 
 
-
-
 class RoutineViewSet(viewsets.ModelViewSet):
     queryset = Routine.objects.all()
     serializer_class = RoutineSerializer
 
     def create(self, request, *args, **kwargs):
-        # Extract relevant data from the request
-        winter_period_time = ['10:15', '11:00', '11:45', '12:30', '1:00', '1:45', '2:30', '3:15', '4:00','4:15','5:00']
-        summer_period_time = ['10:15', '11:05', '11:55', '12:45', '1:35', '2:25', '3:15', '4:05', '4:55','5:45','6:35']
-        # # Convert string representations to time objects
-        # winter_time_objects = [datetime.strptime(time_str, '%H:%M').time() for time_str in winter_period_time]
-        # summer_time_objects = [datetime.strptime(time_str, '%H:%M').time() for time_str in summer_period_time]
+        winter_period_time = ['10:15', '11:00', '11:45', '12:30', '13:00', '13:45', '14:30', '15:15', '16:00', '16:45', '17:30']
+        summer_period_time = ['10:15', '11:05', '11:55', '12:45', '13:35', '14:25', '15:15', '16:05', '16:55', '17:45', '18:35']
+     
+        datetime_format = "%H:%M"
+        winter_period_time = [datetime.strptime(time_str, datetime_format).time() for time_str in winter_period_time]
+        summer_period_time = [datetime.strptime(time_str, datetime_format).time() for time_str in summer_period_time]
 
-        season=request.data.get('season')
-        starting_period_value = request.data.get('starting_period')
-        no_of_period_value = request.data.get('no_of_period')
-        # season='summer'
-        # starting_period_value = int(8)
-        # no_of_period_value = int(1)
-        ending_period_value = starting_period_value + no_of_period_value
+        teacher_id = request.data.get('teacher')
+        room_number = request.data.get('room_number')
+        day = request.data.get('day')
+
+        season = request.data.get('season')
+        starting_period_value = int(request.data.get('starting_period_value', 0))
+        no_of_period_value = int(request.data.get('no_of_period_value', 0))
+
         if season == 'winter':
             period_time = winter_period_time
         elif season == 'summer':
             period_time = summer_period_time
         else:
-            print("Invalid season.")
-            period_time = []
-        # Create period_mapping dynamically using a loop
-        period_mapping = {}
-        for index, time in enumerate(period_time):
-            period_mapping[index + 1] = time
+            return Response({'detail': 'Invalid season.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Get the starting time and ending time based on the input value
-        time_start = period_mapping.get(starting_period_value)
-        time_end = period_mapping.get(ending_period_value)
+        if starting_period_value < 0 or starting_period_value >= len(period_time):
+            return Response({'detail': 'Invalid starting period value.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        teacher_id = request.data.get('teacher')
-        room_number = request.data.get('room_number')
-        day = request.data.get('day')
-        # time_start = request.data.get('time_start')
-        # time_end = request.data.get('time_end')
+        ending_period_value = starting_period_value + no_of_period_value
+        if ending_period_value < 0 or ending_period_value >= len(period_time):
+            return Response({'detail': 'Invalid ending period value.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        time_start = period_time[starting_period_value - 1]
+        time_end = period_time[ending_period_value - 1]
+
+        # Create a mutable copy of request.data
+        data_copy = request.data.copy()
+        data_copy['time_start'] = time_start
+        data_copy['time_end'] = time_end
+
+        # print(request.data)
+        teacher_data_list = request.data.getlist('teacher', [])
+        # print(teacher_data_list)
+
 
         # Check if a routine with the same room, day, and overlapping time exists
         overlapping_routines = Routine.objects.filter(
@@ -296,14 +301,29 @@ class RoutineViewSet(viewsets.ModelViewSet):
                 {'detail': 'The room is already allocated to another teacher for the same day and time.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        
 
+        
+
+        teacher_names = request.data.getlist('teacher', [])
+
+        # Convert teacher names to Teacher instances or IDs
+        teacher_instances = []
+        for teacher_name in teacher_names:
+            teacher_instance = get_object_or_404(Teacher, name=teacher_name)
+            teacher_instances.append(teacher_instance)
+
+        
         # Check if a routine with the same teacher, day, and overlapping time exists
-        overlapping_routines_teacher = Routine.objects.filter(
-            teacher=teacher_id,
-            day=day,
-            time_start__lt=time_end,
-            time_end__gt=time_start
-        )
+        for teacher_instance in teacher_instances:
+            overlapping_routines_teacher = Routine.objects.filter(
+                teacher=teacher_instance,
+                day=day,
+                time_start__lt=time_end,
+                time_end__gt=time_start
+            )
+
+        
 
         if overlapping_routines_teacher.exists():
             return Response(
@@ -311,13 +331,16 @@ class RoutineViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # If no overlapping routine found, proceed with creating the routine
-        serializer = self.get_serializer(data=request.data)
+            
+        serializer = self.get_serializer(data=data_copy)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+        
 
     # For example: /api/routines/get_routines_by_teacher_and_room/?teacher_id=1&room_number=101
     @action(detail=False, methods=['GET'])

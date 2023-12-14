@@ -137,6 +137,7 @@ class Teacher(models.Model):
     email=models.EmailField(max_length=254)
     address=models.CharField(max_length=100)
     phone=models.CharField(max_length=15,unique=True)
+    post=models.CharField(max_length=15,blank=True)
     # subject=models.ManyToManyField(Subject)
     def __str__(self):
         return self.name
@@ -160,16 +161,24 @@ class Routine(models.Model):
         ('lab', 'Lab'),
         ('tutorial', 'Tutorial'),
     ]
+    SEASON_CHOICES = [
+        ('winter', 'Winter'),
+        ('summer', 'Summer'),
+        
+    ]
 
     day = models.CharField(max_length=3, choices=DAY_CHOICES)
-    time_start = models.CharField(max_length=10,blank=True)
-    time_end = models.CharField(max_length=10,blank=True)
+    time_start = models.TimeField(blank=True,null=True)
+    time_end = models.TimeField(blank=True,null=True)
     session_type = models.CharField(max_length=10, choices=SESSION_CHOICES)
     teacher = models.ManyToManyField(Teacher)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
     year = models.ForeignKey(Year, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     room_number = models.CharField(max_length=50)
+    season=models.CharField(max_length=10, choices=SEASON_CHOICES,default="summer")
+    starting_period_value=models.CharField(max_length=10,blank=True)
+    no_of_period_value=models.CharField(max_length=10,blank=True)
 
     def __str__(self):
         return f"{self.year} - {self.subject} - {self.day} {self.time_start}-{self.time_end} ({self.session_type})"

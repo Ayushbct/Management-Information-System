@@ -30,3 +30,19 @@ if time_start:
     print(f"The ending time for period {ending_period_value} is: {time_end}")
 else:
     print("Invalid starting period value.")
+
+
+{
+    "teacher": [5],
+    "subject": "Distrubuted System",
+    "year": "3rd Year",
+    "course": "BCT",
+    "day": "thu",
+    "time_start": "",
+    "time_end": "",
+    "session_type": "lecture",
+    "room_number": "305",
+    "season":"winter",
+    "starting_period_value":"2",
+    "no_of_period_value":"1"
+}

@@ -1,5 +1,10 @@
 from django import forms
-   
+from django.contrib import messages
+from datetime import datetime
+from django.http import HttpResponseBadRequest
+from django.shortcuts import get_object_or_404
+from rest_framework import status
+from rest_framework.response import Response
 # import GeeksModel from models.py
 from api import models as api
    
@@ -42,18 +47,8 @@ class StudentForm(forms.ModelForm):
         fields = "__all__"
 
 
-from datetime import datetime
 class RoutineForm(forms.ModelForm):
-    SEASON_CHOICES = [
-        ('winter', 'Winter'),
-        ('summer', 'Summer')
-    ]
-
-    season = forms.TypedChoiceField(choices=SEASON_CHOICES)
-    starting_period = forms.IntegerField()
-    no_of_period = forms.IntegerField()
     
-
     class Meta:
         model = api.Routine
         fields="__all__"
@@ -64,33 +59,68 @@ class RoutineForm(forms.ModelForm):
         
         cleaned_data = super().clean()
         season = cleaned_data.get('season')
-        starting_period_value = cleaned_data.get('starting_period')
-        no_of_period_value = cleaned_data.get('no_of_period')
+        starting_period_value = int(cleaned_data.get('starting_period_value'))
+        no_of_period_value = int(cleaned_data.get('no_of_period_value'))
         time_start = cleaned_data.get('time_start')
         time_end = cleaned_data.get('time_end')
         
-        if season not in ['winter', 'summer']:
-            raise forms.ValidationError("Invalid season.")
+        day = cleaned_data.get('day')
+        room_number = cleaned_data.get('room_number')
 
-        winter_period_time = ['10:15 a.m.', '11:00 a.m.', '11:45 a.m.', '12:30 p.m.', '1:00 p.m.', '1:45 p.m.', '2:30 p.m.', '3:15 p.m.', '4:00 p.m.', '4:15 p.m.', '5:00 p.m.']
-        summer_period_time = ['10:15 a.m.', '11:05 a.m.', '11:55 a.m.', '12:45 p.m.', '1:35 p.m.','2:25 p.m.', '3:15 p.m.', '4:05 p.m.', '4:55 p.m.', '5:45 p.m.', '6:35 p.m.']
+
+        winter_period_time = ['10:15', '11:00', '11:45', '12:30', '13:00', '13:45', '14:30', '15:15', '16:00', '16:45', '17:30']
+        summer_period_time = ['10:15', '11:05', '11:55', '12:45', '13:35', '14:25', '15:15', '16:05', '16:55', '17:45', '18:35']
+     
+        datetime_format = "%H:%M"
+        winter_period_time = [datetime.strptime(time_str, datetime_format).time() for time_str in winter_period_time]
+        summer_period_time = [datetime.strptime(time_str, datetime_format).time() for time_str in summer_period_time]
         # period no        = [    '1'     ,     '2'     ,     '3'     ,     '4'     ,     '5'    ,    '6'    ,     '7'    ,     '8'    ,     '9'    ,    '10'    ,    '11'    ]
         
 
-        period_time = winter_period_time if season == 'winter' else summer_period_time
-
-        # Create period_mapping dynamically using a loop
-        period_mapping = {}
-        for index, time in enumerate(period_time):
-            period_mapping[index + 1] = time
+        if season == 'winter':
+            period_time = winter_period_time
+        elif season == 'summer':
+            period_time = summer_period_time
+        else:
+            raise forms.ValidationError("Invalid season.")
 
         ending_period_value = starting_period_value + no_of_period_value
-
-        time_start = period_mapping.get(starting_period_value)
-        time_end = period_mapping.get(ending_period_value)
+        # starting_period_value=1
+        # ending_period_value=2
+        time_start = period_time[starting_period_value - 1]
+        time_end = period_time[ending_period_value - 1]
 
         cleaned_data['time_start'] = time_start
         cleaned_data['time_end'] = time_end
+        # Check if a routine with the same room, day, and overlapping time exists
+        overlapping_routines = api.Routine.objects.filter(
+            room_number=room_number,
+            day=day,
+            time_start__lt=time_end,
+            time_end__gt=time_start
+        )
 
+        if overlapping_routines.exists():
+            print("room_number': 'The room is already allocated to another teacher for the same day and time.")
+            raise forms.ValidationError({'room_number': 'The room is already allocated to another teacher for the same day and time.'})
+
+
+        # Convert teacher names to Teacher instances
+        teacher_names = self.cleaned_data.get('teacher', [])
+        teacher_instances = [get_object_or_404(api.Teacher, name=teacher_name) for teacher_name in teacher_names]
+
+        # Check if a routine with the same teacher, day, and overlapping time exists
+        for teacher_instance in teacher_instances:
+            overlapping_routines_teacher = api.Routine.objects.filter(
+                teacher=teacher_instance,
+                day=day,
+                time_start__lt=time_end,
+                time_end__gt=time_start
+            )
+
+            if overlapping_routines_teacher.exists():
+                print(f'A routine with {teacher_instance.name}, day, and overlapping time already exists.')
+                raise forms.ValidationError({'teacher': f'A routine with {teacher_instance.name}, day, and overlapping time already exists.'})    
 
         return cleaned_data
+

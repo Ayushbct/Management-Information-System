@@ -482,6 +482,7 @@ def routine(request):
         form=RoutineForm(request.POST)
         
         if form.is_valid():    
+            # print(form.cleaned_data)
             form.save()
             messages.success(request, 'routine has been saved successfully')
             
