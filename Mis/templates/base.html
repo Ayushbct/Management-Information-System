@@ -7,9 +7,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock title %} | MIS</title>
     
+    {% comment %} <link href="static\css\bootstrap.css" rel="stylesheet" > {% endcomment %}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    {% comment %} <script src="static\js\bootstrap.js" ></script> {% endcomment %}
     
 
 </head>
@@ -70,13 +72,104 @@
                 <a class="nav-link disabled">Disabled</a>
               </li>
             </ul>
-            <form class="d-flex" role="search">
-              <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-              <button class="btn btn-outline-success" type="submit">Search</button>
-            </form>
+            <div class="d-flex">
+              {% if user.is_authenticated %}
+              <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                    Welcome {{request.user.first_name}} {{request.user.last_name}}
+                  </a>
+                  <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#change_passwordModal" href="/change_password">Change password</a></li>
+                    {% comment %} <button type="button" class="btn btn-primary " data-bs-toggle="modal" data-bs-target="#change_passwordModal">
+                      Change password
+                    </button> {% endcomment %}
+                    <li><a class="dropdown-item" href="/logout">Logout</a></li>
+    
+                  </ul>
+                </li>
+              </ul>
+              {% else %}
+    
+              
+              <!-- Button to trigger login modal -->
+              <button type="button" class="btn btn-primary " data-bs-toggle="modal" data-bs-target="#loginModal">
+                Login
+              </button>
+              {% endif %}
+            </div>
           </div>
         </div>
     </nav>
+  </div>
+  
+
+  <!-- Login Modal -->
+  <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="loginModalLabel">Login</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <form action='login' method='POST'>
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="loginusername" class="form-label">Username</label>
+              <input type="text" required class="form-control" id="loginusername" name="loginusername"
+                placeholder="Enter username">
+            </div>
+            <div class="mb-3">
+              <label for="loginpassword1" class="form-label">Enter Password</label>
+              <input type="password" required class="form-control" id="loginpassword1" name="loginpassword1"
+                placeholder="Enter password">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Login</button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div class="modal fade" id="change_passwordModal" tabindex="-1" aria-labelledby="change_passwordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="change_passwordModalLabel">Change password</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <form action='change_password' method='POST'>
+            {% csrf_token %}
+            {% comment %} <div class="mb-3">
+              <label for="change_passwordusername" class="form-label">Username</label>
+              <input type="text" required class="form-control" id="change_passwordusername" name="change_passwordusername"
+                placeholder="Enter username">
+            </div> {% endcomment %}
+            <div class="mb-3">
+              <label for="change_password1" class="form-label">Enter new Password</label>
+              <input type="password" required class="form-control" id="change_password1" name="change_password1"
+                placeholder="Enter new password">
+            </div>
+            <div class="mb-3">
+              <label for="change_password2" class="form-label">Confirm new Password</label>
+              <input type="password" required class="form-control" id="change_password2" name="change_password2"
+                placeholder="Confirm new password">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Change password</button>
+          </form>
+        </div>
+
+      </div>
+    </div>
   </div>
   
   <div>
