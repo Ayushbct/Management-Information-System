@@ -53,5 +53,10 @@ urlpatterns = [
     path('routine_delete/<int:id>', views.routine_delete,name='routine_delete'),
     path('routine_update/<int:id>', views.update_routine, name='routine_update'),
 
+    path('teacher', views.teacher,name='teacher'),
+    path('teacher_delete/<int:id>', views.teacher_delete,name='teacher_delete'),
 
+    path('login',views.handleLogin,name='handleLogin'),
+    path('logout',views.handleLogout,name='handleLogout'),
+    path('change_password',views.change_password,name='change_password'),
 ]

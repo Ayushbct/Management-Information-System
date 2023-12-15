@@ -7,6 +7,10 @@ from django.db.models import Q
 from datetime import datetime, timedelta
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate,login,logout
+from django.db import transaction
 # Create your views here.
 # @api_view(['GET'])
 # def getRoutes(Request):
@@ -32,6 +36,15 @@ from rest_framework import viewsets
 class DepartmentViewSet(viewsets.ModelViewSet):
     queryset=Department.objects.all()
     serializer_class=DepartmentSerializer
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset=User.objects.all()
+    serializer_class=UserSerializer
+
+
+class ProfileViewSet(viewsets.ModelViewSet):
+    queryset=Profile.objects.all()
+    serializer_class=ProfileSerializer
 
 class YearViewSet(viewsets.ModelViewSet):
     queryset=Year.objects.all()
@@ -94,20 +107,56 @@ class StudentViewSet(viewsets.ModelViewSet):
             return Response({'error': 'No such student found'})
 
 
+
 class TeacherViewSet(viewsets.ModelViewSet):
-    queryset=Teacher.objects.all()
-    serializer_class=TeacherSerializer
-    # This is for custom URL teacher/id/subjects
-    @action(detail=True, methods=['get'])
-    def subjects(self, request, pk=None):
-        try:
-            teacher = Teacher.objects.get(pk=pk)
-            subjects = teacher.subject.all()
-            subjects_serializer = SubjectSerializer(subjects, many=True, context={'request': request})
-            return Response(subjects_serializer.data)
-        except Teacher.DoesNotExist:
-            return Response({'error': 'No such teacher found'})
+    queryset = Teacher.objects.all()
+    serializer_class = TeacherSerializer
+
+    def create(self, request, *args, **kwargs):
+        name = request.data.get('name')
+        phone = request.data.get('phone')
+        email = request.data.get('email')
+        address = request.data.get('address')
+        post = request.data.get('post')
+
+        # Split the full name into first and last names
+        names = name.split() if name else []
+        first_name = ' '.join(names[:-1]) if len(names) > 1 else names[0]
+        last_name = names[-1] if len(names) > 1 else ''
+
+        # Check if a user with the provided username (phone) already exists
+        existing_user = User.objects.filter(username=phone)
+        if existing_user:
+            return Response({'error': 'A user with that username already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+
         
+
+        existing_profile = Profile.objects.filter(user=phone)
+        if existing_profile:
+            return Response({'error': 'A profile with that username already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create a new user
+        myuser = User.objects.create_user(username=phone, email=email, password=phone)
+        # myuser.set_password(phone)  # You may want to set a password, assuming it's the phone number for simplicity
+        myuser.first_name = first_name
+        myuser.last_name = last_name
+        myuser.save()
+        # Create a new user
+        profile=Profile.objects.create(user=myuser)
+        
+        data_copy = request.data.copy()
+        # Update request.data with the new profile ID
+        data_copy['profile'] = profile.id
+
+        # Continue with creating the teacher
+
+        Teacher.objects.create(profile=profile,name=name,email=email,address=address,phone=phone,post=post)
+        # serializer = self.get_serializer(data=data_copy)
+        # if serializer.is_valid():
+        #     serializer.save()
+        #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response({'teacher': "Sucessfully created"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SemesterViewSet(viewsets.ModelViewSet):
@@ -253,7 +302,8 @@ class RoutineViewSet(viewsets.ModelViewSet):
         winter_period_time = [datetime.strptime(time_str, datetime_format).time() for time_str in winter_period_time]
         summer_period_time = [datetime.strptime(time_str, datetime_format).time() for time_str in summer_period_time]
 
-        teacher_id = request.data.get('teacher')
+        # teacher_id = request.data.get('teacher')
+        teacher_names=request.POST.getlist('teacher')
         room_number = request.data.get('room_number')
         day = request.data.get('day')
 
@@ -284,10 +334,10 @@ class RoutineViewSet(viewsets.ModelViewSet):
         data_copy['time_end'] = time_end
 
         # print(request.data)
-        teacher_data_list = request.data.getlist('teacher', [])
+        # teacher_data_list = request.data.getlist('teacher', [])
         # print(teacher_data_list)
 
-
+        overlapping_routines = Routine.objects.none()
         # Check if a routine with the same room, day, and overlapping time exists
         overlapping_routines = Routine.objects.filter(
             room_number=room_number,
@@ -304,8 +354,10 @@ class RoutineViewSet(viewsets.ModelViewSet):
         
 
         
-
-        teacher_names = request.data.getlist('teacher', [])
+        teacher_names=request.POST.getlist('teacher')
+        # print(teacher_names)
+        # teacher_names = request.data.get('teacher', [])
+        # print(teacher_names)
 
         # Convert teacher names to Teacher instances or IDs
         teacher_instances = []
@@ -313,7 +365,7 @@ class RoutineViewSet(viewsets.ModelViewSet):
             teacher_instance = get_object_or_404(Teacher, name=teacher_name)
             teacher_instances.append(teacher_instance)
 
-        
+        overlapping_routines_teacher = Routine.objects.none()
         # Check if a routine with the same teacher, day, and overlapping time exists
         for teacher_instance in teacher_instances:
             overlapping_routines_teacher = Routine.objects.filter(

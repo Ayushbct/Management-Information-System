@@ -26,8 +26,6 @@ def index(request):
     #     'uploaded_file_url': uploaded_file_url,
     # }
     file_path=''
-
-    profile=Profile.objects.get(user=request.user)
     
     if request.method == 'POST':
         profile=Profile.objects.get(user=request.user)
@@ -83,12 +81,11 @@ def index(request):
     #     os.remove(file_path)
 
 
-    file_user_basename=''
+    
     # file_generated_basename=''
     
     
-    if profile.file_user:
-        file_user_basename=os.path.basename(profile.file_user.path)
+    
     # if profile.file_generated:
     #     file_generated_basename=os.path.basename(profile.file_generated.path)
     # # Upload files code above below new app
@@ -117,8 +114,8 @@ def index(request):
     # # print(department_removing_dup)
     context={
         
-        "profile":profile,
-        "file_user_basename":file_user_basename,
+        
+        
         
     }
     
@@ -130,6 +127,7 @@ def index(request):
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.contrib.auth import authenticate,login,logout
 
 @api_view()
 def hello_world(request):
@@ -517,3 +515,67 @@ def update_routine(request, id):
         'routine': routine
     }
     return render(request, 'update_routine.html', context)
+
+def teacher(request):
+    
+    context ={}
+    all_teachers=Teacher.objects.all()
+    # context['routineform']= routineForm()
+    context={
+        'teacherform':TeacherForm(),
+        'all_teachers':all_teachers,
+    }
+    if request.method == 'POST':
+        form=TeacherForm(request.POST)
+        
+        if form.is_valid():    
+            # print(form.cleaned_data)
+            form.save()
+            messages.success(request, 'Teacher has been saved successfully')
+            
+        else:
+            messages.error(request, 'Teacher cannot be saved') 
+        
+    return render(request, "teacher.html", context)
+def teacher_delete(request,id):
+    
+    teacher=Teacher.objects.get(pk=id)
+    teacher.delete()
+    return redirect('/teacher')
+
+def handleLogin(request):
+    if request.method=="POST":
+        loginusername=request.POST['loginusername']
+        loginpassword1=request.POST['loginpassword1']
+        
+        user=authenticate(username=loginusername,password=loginpassword1)
+
+        if user is not None:
+            login(request,user)
+            messages.success(request, 'Successfully logged in')
+            return redirect('/')
+        else:
+            messages.error(request, 'Unsuccessfull to log in, Please try again')
+            return redirect('/')
+    return HttpResponse('404 - Not Found')
+
+def handleLogout(request):
+    
+    logout(request)
+    messages.success(request, 'Successfully logged out')
+    return redirect('/')
+
+
+def change_password(request):
+    if request.method=="POST":
+        change_password1=request.POST['change_password1']
+        change_password2=request.POST['change_password2']
+        # print(change_password1)
+        if change_password1!=change_password2:
+            messages.error(request,"Passwords do not match try again")
+            return redirect('/')
+        u = request.user
+        u.set_password(change_password1)
+        u.save()
+        messages.success(request, 'Successfully password changed')
+    return redirect('/')

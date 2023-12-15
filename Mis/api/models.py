@@ -132,7 +132,7 @@ class Attendance(models.Model):
 
 
 class Teacher(models.Model):
-
+    profile = models.ForeignKey(Profile,blank=True,null=True, on_delete=models.CASCADE)
     name=models.CharField(max_length=100)
     email=models.EmailField(max_length=254)
     address=models.CharField(max_length=100)

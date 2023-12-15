@@ -1,10 +1,30 @@
 from rest_framework.serializers import *
 from .models import *
 from rest_framework import serializers
+from django.contrib.auth.models import User
 # class YearSerializer(ModelSerializer):
 #     class Meta:
 #         model=Year
 #         fields='__all__'
+
+class UserSerializer(ModelSerializer):
+    # permissions = serializers.HyperlinkedRelatedField(
+    #     many=True,
+    #     read_only=True,
+    #     # view_name='permission-detail'  # Ensure this matches your URL configuration
+    # )
+
+    class Meta:
+        model = User
+        fields = ['url', 'id', 'username']
+
+
+class ProfileSerializer(ModelSerializer):
+    user=UserSerializer()
+    class Meta:
+        model = Profile
+        
+        fields = '__all__'
 
 class DepartmentSerializer(HyperlinkedModelSerializer):
     id=ReadOnlyField()
@@ -28,6 +48,10 @@ class StudentSerializer(HyperlinkedModelSerializer):
 
 class TeacherSerializer(HyperlinkedModelSerializer):
     id=ReadOnlyField()
+    # profile=ProfileSerializer()
+    
+    profile = ProfileSerializer()
+    
     class Meta:
         model=Teacher
         fields='__all__'

@@ -3,6 +3,8 @@ from api import views
 
 from rest_framework import routers
 router=routers.DefaultRouter()
+router.register(r'users',views.UserViewSet)
+router.register(r'profiles',views.ProfileViewSet)
 router.register(r'departments',views.DepartmentViewSet)
 router.register(r'years',views.YearViewSet)
 router.register(r'students',views.StudentViewSet)
@@ -36,6 +38,8 @@ urlpatterns = [
     path('teachers/<int:pk>/subjects/<int:subject_id>/students/<int:student_id>/', views.StudentViewSet.as_view({'get': 'subject_student'}), name='teacher-subject-student'),
 
     path('teachers/<int:pk>/subjects/<int:subject_id>/students/<int:student_id>/attendance/', views.AttendanceViewSet.as_view({'get': 'get_student_attendance','post': 'create_student_attendance'}), name='teacher-subject-student-attendance'),
+
+    
 
     path('deletedepartments/',views.Deletedepartments,name='deletedepartments'),
     path('deleteyears/',views.Deleteyears,name='deleteyears'),

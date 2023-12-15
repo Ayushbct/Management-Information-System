@@ -7,6 +7,8 @@ from rest_framework import status
 from rest_framework.response import Response
 # import GeeksModel from models.py
 from api import models as api
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
    
 # create a ModelForm
 class DepartmentForm(forms.ModelForm):
@@ -45,6 +47,50 @@ class StudentForm(forms.ModelForm):
     class Meta:
         model = api.Student
         fields = "__all__"
+
+class TeacherForm(forms.ModelForm):
+    # specify the name of model to use
+    class Meta:
+        model = api.Teacher
+        fields = "__all__"
+
+    def clean(self):
+        
+        cleaned_data = super().clean()
+        name=cleaned_data.get('name')
+        # Split the full name into first and last names
+        if name:
+            names = name.split()
+            first_name = ' '.join(names[:-1]) if len(names) > 1 else names[0]
+            last_name = names[-1]
+        phone = cleaned_data.get('phone')
+        email = cleaned_data.get('email')
+
+        user_exists = User.objects.filter(username=phone).exists()
+
+        if user_exists:
+            raise ValidationError("User with this phone number already exists.")
+
+        # Check if the profile already exists
+        profile_exists = api.Profile.objects.filter(user__username=phone).exists()
+
+        if profile_exists:
+            raise ValidationError("Profile for this phone number already exists.")
+
+
+        myuser=User.objects.create_user(phone,email,phone)
+        myuser.first_name=first_name
+        myuser.last_name=last_name
+        myuser.save()
+        # cleaned_data['time_start'] = time_start
+        # cleaned_data['time_end'] = time_end
+
+        profile=api.Profile.objects.create(
+            user=myuser,
+        )
+        cleaned_data['profile']=profile
+
+        return cleaned_data
 
 
 class RoutineForm(forms.ModelForm):
