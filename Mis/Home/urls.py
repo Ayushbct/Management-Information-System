@@ -55,6 +55,7 @@ urlpatterns = [
 
     path('teacher', views.teacher,name='teacher'),
     path('teacher_delete/<int:id>', views.teacher_delete,name='teacher_delete'),
+    path('teacher_update/<int:id>', views.update_teacher, name='teacher_update'),
 
     path('login',views.handleLogin,name='handleLogin'),
     path('logout',views.handleLogout,name='handleLogout'),

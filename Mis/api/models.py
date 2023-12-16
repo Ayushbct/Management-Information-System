@@ -137,7 +137,7 @@ class Teacher(models.Model):
     email=models.EmailField(max_length=254)
     address=models.CharField(max_length=100)
     phone=models.CharField(max_length=15,unique=True)
-    post=models.CharField(max_length=15,blank=True)
+    post=models.CharField(max_length=30,blank=True)
     # subject=models.ManyToManyField(Subject)
     def __str__(self):
         return self.name

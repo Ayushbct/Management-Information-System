@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from api import models as api
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.db import transaction
    
 # create a ModelForm
 class DepartmentForm(forms.ModelForm):
@@ -48,49 +49,100 @@ class StudentForm(forms.ModelForm):
         model = api.Student
         fields = "__all__"
 
+from django.core.exceptions import ValidationError
+from django.db import transaction
+
 class TeacherForm(forms.ModelForm):
-    # specify the name of model to use
     class Meta:
         model = api.Teacher
         fields = "__all__"
 
+    @transaction.atomic
     def clean(self):
-        
         cleaned_data = super().clean()
-        name=cleaned_data.get('name')
+        name = cleaned_data.get('name')
+        phone = cleaned_data.get('phone')
+        email = cleaned_data.get('email')
+
         # Split the full name into first and last names
         if name:
             names = name.split()
             first_name = ' '.join(names[:-1]) if len(names) > 1 else names[0]
             last_name = names[-1]
-        phone = cleaned_data.get('phone')
-        email = cleaned_data.get('email')
 
+        # Check if the user with the given phone number exists
         user_exists = User.objects.filter(username=phone).exists()
 
         if user_exists:
-            raise ValidationError("User with this phone number already exists.")
+            # If user exists, get the existing user
+            myuser = User.objects.get(username=phone)
+        else:
+            # If user does not exist, create a new user
+            myuser = User.objects.create_user(phone, email, phone)
+            myuser.first_name = first_name
+            myuser.last_name = last_name
+            myuser.save()
 
-        # Check if the profile already exists
-        profile_exists = api.Profile.objects.filter(user__username=phone).exists()
+        # Check if a profile for the user already exists
+        profile_exists = api.Profile.objects.filter(user=myuser).exists()
 
         if profile_exists:
-            raise ValidationError("Profile for this phone number already exists.")
+            # If profile exists, get the existing profile
+            profile_instance = api.Profile.objects.get(user=myuser)
+        else:
+            # If profile does not exist, create a new profile
+            profile_instance = api.Profile.objects.create(user=myuser)
 
-
-        myuser=User.objects.create_user(phone,email,phone)
-        myuser.first_name=first_name
-        myuser.last_name=last_name
-        myuser.save()
-        # cleaned_data['time_start'] = time_start
-        # cleaned_data['time_end'] = time_end
-
-        profile=api.Profile.objects.create(
-            user=myuser,
-        )
-        cleaned_data['profile']=profile
+        cleaned_data['profile'] = profile_instance
 
         return cleaned_data
+
+
+# class TeacherForm(forms.ModelForm):
+#     # specify the name of model to use
+#     class Meta:
+#         model = api.Teacher
+#         fields = "__all__"
+
+#     @transaction.atomic
+#     def clean(self):
+        
+#         cleaned_data = super().clean()
+#         name=cleaned_data.get('name')
+#         # Split the full name into first and last names
+#         if name:
+#             names = name.split()
+#             first_name = ' '.join(names[:-1]) if len(names) > 1 else names[0]
+#             last_name = names[-1]
+#         phone = cleaned_data.get('phone')
+#         email = cleaned_data.get('email')
+
+#         user_exists = User.objects.filter(username=phone).exists()
+#         # Check if the profile already exists
+#         profile_exists = api.Profile.objects.filter(user__username=phone).exists()
+
+#         if user_exists:
+#             # raise ValidationError("User with this phone number already exists.")
+#             myuser=User.objects.filter(username=phone)
+        
+#         if profile_exists:
+#             # raise ValidationError("Profile for this phone number already exists.")
+#             profile=api.Profile.objects.filter(user__username=phone)
+
+#         else:
+
+#             myuser=User.objects.create_user(phone,email,phone)
+#             myuser.first_name=first_name
+#             myuser.last_name=last_name
+#             myuser.save()
+#             profile=api.Profile.objects.create(user=myuser,)
+#         # cleaned_data['time_start'] = time_start
+#         # cleaned_data['time_end'] = time_end
+
+        
+#         cleaned_data['profile']=profile
+
+#         return cleaned_data
 
 
 class RoutineForm(forms.ModelForm):

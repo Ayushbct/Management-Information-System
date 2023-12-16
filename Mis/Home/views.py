@@ -540,8 +540,32 @@ def teacher(request):
 def teacher_delete(request,id):
     
     teacher=Teacher.objects.get(pk=id)
-    teacher.delete()
+    # teacher.profile.user
+    user=User.objects.get(username=teacher.phone)
+    user.delete()
+    messages.success(request, 'Teacher deleted successfully')
     return redirect('/teacher')
+
+def update_teacher(request, id):
+    teacher = Teacher.objects.get(pk=id)
+
+    if request.method == 'POST':
+        form = TeacherForm(request.POST, instance=teacher)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'teacher has been updated successfully')
+            return redirect('/teacher')
+        else:
+            messages.error(request, 'teacher could not be updated')
+
+    else:
+        form = TeacherForm(instance=teacher)
+
+    context = {
+        'form': form,
+        'teacher': teacher
+    }
+    return render(request, 'update_teacher.html', context)
 
 def handleLogin(request):
     if request.method=="POST":

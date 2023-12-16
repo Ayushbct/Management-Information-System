@@ -126,23 +126,38 @@ class TeacherViewSet(viewsets.ModelViewSet):
 
         # Check if a user with the provided username (phone) already exists
         existing_user = User.objects.filter(username=phone)
+        # if existing_user:
+        #     return Response({'error': 'A user with that username already exists.'}, status=status.HTTP_400_BAD_REQUEST)
         if existing_user:
-            return Response({'error': 'A user with that username already exists.'}, status=status.HTTP_400_BAD_REQUEST)
-
+            # If user exists, get the existing user
+            myuser = User.objects.get(username=phone)
+        else:
+            # If user does not exist, create a new user
+            myuser = User.objects.create_user(phone, email, phone)
+            myuser.first_name = first_name
+            myuser.last_name = last_name
+            myuser.save()
         
 
         existing_profile = Profile.objects.filter(user=phone)
-        if existing_profile:
-            return Response({'error': 'A profile with that username already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+        # if existing_profile:
+        #     return Response({'error': 'A profile with that username already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+        # profile_exists = api.Profile.objects.filter(user=myuser).exists()
 
-        # Create a new user
-        myuser = User.objects.create_user(username=phone, email=email, password=phone)
-        # myuser.set_password(phone)  # You may want to set a password, assuming it's the phone number for simplicity
-        myuser.first_name = first_name
-        myuser.last_name = last_name
-        myuser.save()
-        # Create a new user
-        profile=Profile.objects.create(user=myuser)
+        if existing_profile:
+            # If profile exists, get the existing profile
+            profile = Profile.objects.get(user=myuser)
+        else:
+            # If profile does not exist, create a new profile
+            profile = Profile.objects.create(user=myuser)
+        # # Create a new user
+        # myuser = User.objects.create_user(username=phone, email=email, password=phone)
+        # # myuser.set_password(phone)  # You may want to set a password, assuming it's the phone number for simplicity
+        # myuser.first_name = first_name
+        # myuser.last_name = last_name
+        # myuser.save()
+        # # Create a new user
+        # profile=Profile.objects.create(user=myuser)
         
         data_copy = request.data.copy()
         # Update request.data with the new profile ID
