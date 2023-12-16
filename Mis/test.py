@@ -30,7 +30,10 @@ if time_start:
     print(f"The ending time for period {ending_period_value} is: {time_end}")
 else:
     print("Invalid starting period value.")
+076bct013ayush
+MoiOoIJ6yEGSCWrK
 
+mongodb+srv://076bct013ayush:MoiOoIJ6yEGSCWrK@miscluster.zimodif.mongodb.net/?retryWrites=true&w=majority
 
 {
     "teacher": [5],

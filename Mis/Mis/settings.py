@@ -92,11 +92,38 @@ WSGI_APPLICATION = 'Mis.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
+
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
+
+uri = "mongodb+srv://076bct013ayush:MoiOoIJ6yEGSCWrK@miscluster.zimodif.mongodb.net/?retryWrites=true&w=majority"
+
+# Create a new client and connect to the server
+client = MongoClient(uri, server_api=ServerApi('1'))
+
+# Send a ping to confirm a successful connection
+try:
+    client.admin.command('ping')
+    print("Pinged your deployment. You successfully connected to MongoDB!")
+except Exception as e:
+    print(e)
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'default': {
+            'ENGINE': 'djongo',
+            'NAME': 'MISCluster',
+            
+            'CLIENT': {
+                'host': 'mongodb+srv://076bct013ayush:MoiOoIJ6yEGSCWrK@miscluster.zimodif.mongodb.net/?retryWrites=true&w=majority'
+            }  
+        }
 }
 # DATABASES = {
 #     'default': {
