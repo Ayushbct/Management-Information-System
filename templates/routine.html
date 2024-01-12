@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{%load crispy_forms_tags %} 
+{% block title %}routine{% endblock title %}
+{% block body %}
+<form action = "" method = "post">
+    {% csrf_token %}
+    {{routineform |crispy }}
+    <input type="submit" value="Submit">
+</form>
+
+<div>
+<table class="table table-striped table-hover table-bordered">
+    <thead>
+      <tr>
+        <th scope="col">S.N</th>
+        <th scope="col">Day</th>
+        <th scope="col">Time start</th>
+        <th scope="col">Time end</th>
+        <th scope="col">Session type</th>
+        <th scope="col">Teacher</th>
+        <th scope="col">Subject</th>
+        <th scope="col">Year</th>
+        <th scope="col">Course</th>
+        <th scope="col">Room no</th>
+        <th scope="col">Action</th>
+        
+      </tr>
+    </thead>
+    <tbody>
+        {% for as in all_routines %}
+        <tr>
+        <th scope="row">{{forloop.counter}}</th>
+        <td>{{as.day}}</td>
+        <td>{{as.time_start}}</td>
+        <td>{{as.time_end}}</td>
+        <td>{{as.session_type}}</td>
+        <td>{{as.teacher}}</td>
+        <td>{{as.subject}}</td>
+        <td>{{as.year}}</td>
+        <td>{{as.course}}</td>
+        <td>{{as.room_number}}</td>
+        
+        
+        <td>
+          {% comment %} <a href="{% url 'routine_detail' as.id %}">
+            <button type="button" class="btn btn-sm btn-info">Detail</button>
+        </a> {% endcomment %}
+        
+            <a href="routine_update/{{as.id}}">
+              <button type="button" class="btn btn-sm btn-warning">Edit</button>
+          </a>
+            
+            <a href="routine_delete/{{as.id}}">
+                <button type="button" class="btn btn-sm btn-danger">Delete</button>
+            </a>
+            {% comment %} <button type="button" class="btn btn-sm btn-danger">Delete</button> {% endcomment %}
+
+        </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+{% endblock body %}

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{%load crispy_forms_tags %} 
+{% block title %}course{% endblock title %}
+{% block body %}
+<form action = "" method = "post">
+    {% csrf_token %}
+    {{courseform |crispy }}
+    <input type="submit" value="Submit">
+    {% comment %} <button type="submit" class="btn btn-primary">Submit</button> {% endcomment %}
+</form>
+
+<div>
+<table class="table table-striped table-hover table-bordered">
+    <thead>
+      <tr>
+        <th scope="col">S.N</th>
+        <th scope="col">course</th>
+        <th scope="col">Action</th>
+        
+      </tr>
+    </thead>
+    <tbody>
+        {% for ac in all_courses %}
+        <tr>
+        <th scope="row">{{forloop.counter}}</th>
+        <td>{{ac.name}}</td>
+        <td>
+          {% comment %} <a href="{% url 'course_detail' ac.id %}">
+            <button type="button" class="btn btn-sm btn-info">Detail</button>
+        </a> {% endcomment %}
+        
+            <a href="course_update/{{ac.id}}">
+              <button type="button" class="btn btn-sm btn-warning">Edit</button>
+          </a>
+            
+            <a href="course_delete/{{ac.id}}">
+                <button type="button" class="btn btn-sm btn-danger">Delete</button>
+            </a>
+            {% comment %} <button type="button" class="btn btn-sm btn-danger">Delete</button> {% endcomment %}
+
+        </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+{% endblock body %}

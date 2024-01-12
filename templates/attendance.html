@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{%load crispy_forms_tags %} 
+{% block title %}attendance{% endblock title %}
+{% block body %}
+<form action = "" method = "post">
+    {% csrf_token %}
+    {{attendanceform |crispy }}
+    <input type="submit" value="Submit">
+</form>
+
+<div>
+<table class="table table-striped table-hover table-bordered">
+    <thead>
+      <tr>
+        <th scope="col">S.N</th>
+        <th scope="col">subjectins</th>
+        <th scope="col">Name Roll</th>
+        <th scope="col">attendance date</th>
+        <th scope="col">attendance_status</th>
+        <th scope="col">Dade updated</th>
+        <th scope="col">Action</th>
+        
+      </tr>
+    </thead>
+    <tbody>
+        {% for at in all_attendances %}
+        <tr>
+        <th scope="row">{{forloop.counter}}</th>
+        <td>{{at.subjectIns.name}}</td>
+        <td>{{at.student.name}} {{at.student.roll_no}}</td>
+        <td>{{at.attendance_date}}</td>
+        <td>{{at.attendance_status}}</td>
+        <td>{{at.date_updated}}</td>
+        
+        <td>
+          {% comment %} <a href="{% url 'attendance_detail' at.id %}">
+            <button type="button" class="btn btn-sm btn-info">Detail</button>
+        </a> {% endcomment %}
+        
+            <a href="attendance_update/{{at.id}}">
+              <button type="button" class="btn btn-sm btn-warning">Edit</button>
+          </a>
+            
+            <a href="attendance_delete/{{at.id}}">
+                <button type="button" class="btn btn-sm btn-danger">Delete</button>
+            </a>
+            {% comment %} <button type="button" class="btn btn-sm btn-danger">Delete</button> {% endcomment %}
+
+        </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+{% endblock body %}

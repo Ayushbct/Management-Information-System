@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{%load crispy_forms_tags %} 
+{% block title %}Subject{% endblock title %}
+{% block body %}
+<form action = "" method = "post">
+    {% csrf_token %}
+    {{subjectform |crispy }}
+    <input type="submit" value="Submit">
+</form>
+
+<div>
+<table class="table table-striped table-hover table-bordered">
+    <thead>
+      <tr>
+        <th scope="col">S.N</th>
+        <th scope="col">subject</th>
+        <th scope="col">Action</th>
+        
+      </tr>
+    </thead>
+    <tbody>
+        {% for as in all_subjects %}
+        <tr>
+        <th scope="row">{{forloop.counter}}</th>
+        <td>{{as.name}}</td>
+        <td>
+          {% comment %} <a href="{% url 'subject_detail' as.id %}">
+            <button type="button" class="btn btn-sm btn-info">Detail</button>
+        </a> {% endcomment %}
+        
+            <a href="subject_update/{{as.id}}">
+              <button type=s="btn btn-sm btn-warning">Edit</button>
+          </a>
+            
+            <a href="subject_delete/{{as.id}}">
+                <button type="button" class="btn btn-sm btn-danger">Delete</button>
+            </a>
+            {% comment %} <button type="button" class="btn btn-sm btn-danger">Delete</button> {% endcomment %}
+
+        </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+{% endblock body %}
