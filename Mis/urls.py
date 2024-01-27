@@ -22,7 +22,7 @@ admin.site.site_title="MIS Admin Portal"
 admin.site.index_title="Welcome to MIS Admin Portal"
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('', include("Home.urls")),
+    path('', include("Home.urls")),
     path('api/', include("api.urls")),
     path('user/',include('account.urls'))
 ]

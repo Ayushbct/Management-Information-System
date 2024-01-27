@@ -135,10 +135,11 @@ class Attendance(models.Model):
 class Teacher(models.Model):
     user = models.OneToOneField(User,null=True,blank=True, on_delete=models.CASCADE)
     name=models.CharField(max_length=100,)
-    email=models.EmailField(max_length=254,unique=True)
+    email=models.EmailField(max_length=254,unique=True,null=True,blank=True)
     address=models.CharField(max_length=100,null=True,blank=True)
     phone=models.CharField(max_length=15,unique=True)
-    post=models.CharField(max_length=15,blank=True)
+    post=models.CharField(max_length=40,null=True,blank=True)
+    out_of_department = models.BooleanField(default=False)
     # subject=models.ManyToManyField(Subject)
     def __str__(self):
         return self.name
@@ -161,6 +162,7 @@ class Routine(models.Model):
         ('lecture', 'Lecture'),
         ('lab', 'Lab'),
         ('tutorial', 'Tutorial'),
+        ('lecture and tutorial', 'Lecture + Tutorial'),
     ]
     SEASON_CHOICES = [
         ('winter', 'Winter'),
@@ -171,7 +173,7 @@ class Routine(models.Model):
     day = models.CharField(max_length=3, choices=DAY_CHOICES)
     time_start = models.TimeField(blank=True,null=True)
     time_end = models.TimeField(blank=True,null=True)
-    session_type = models.CharField(max_length=10, choices=SESSION_CHOICES)
+    session_type = models.CharField(max_length=25, choices=SESSION_CHOICES)
     teacher = models.ManyToManyField(Teacher,blank=True)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
     year = models.ForeignKey(Year, on_delete=models.CASCADE)
