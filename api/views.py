@@ -245,106 +245,7 @@ class RoutineViewSet(viewsets.ModelViewSet):
     queryset = Routine.objects.all()
     serializer_class = RoutineSerializer
 
-    # def create(self, request, *args, **kwargs):
-    #     winter_period_time = ['10:15', '11:00', '11:45', '12:30', '13:00', '13:45', '14:30', '15:15', '16:00', '16:45', '17:30']
-    #     summer_period_time = ['10:15', '11:05', '11:55', '12:45', '13:35', '14:25', '15:15', '16:05', '16:55', '17:45', '18:35']
-     
-    #     datetime_format = "%H:%M"
-    #     winter_period_time = [datetime.strptime(time_str, datetime_format).time() for time_str in winter_period_time]
-    #     summer_period_time = [datetime.strptime(time_str, datetime_format).time() for time_str in summer_period_time]
-
-    #     # teacher_id = request.data.get('teacher')
-    #     teacher_names=request.POST.getlist('teacher')
-    #     room_number = request.data.get('room_number')
-    #     day = request.data.get('day')
-
-    #     season = request.data.get('season')
-    #     starting_period_value = int(request.data.get('starting_period_value', 0))
-    #     no_of_period_value = int(request.data.get('no_of_period_value', 0))
-
-    #     if season == 'winter':
-    #         period_time = winter_period_time
-    #     elif season == 'summer':
-    #         period_time = summer_period_time
-    #     else:
-    #         return Response({'error': 'Invalid season.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    #     if starting_period_value < 0 or starting_period_value >= len(period_time):
-    #         return Response({'error': 'Invalid starting period value.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    #     ending_period_value = starting_period_value + no_of_period_value
-    #     if ending_period_value < 0 or ending_period_value >= len(period_time):
-    #         return Response({'error': 'Invalid ending period value.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    #     time_start = period_time[starting_period_value - 1]
-    #     time_end = period_time[ending_period_value - 1]
-
-    #     # Create a mutable copy of request.data
-    #     data_copy = request.data.copy()
-    #     data_copy['time_start'] = time_start
-    #     data_copy['time_end'] = time_end
-
-    #     # print(request.data)
-    #     # teacher_data_list = request.data.getlist('teacher', [])
-    #     # print(teacher_data_list)
-
-    #     overlapping_routines = Routine.objects.none()
-    #     # Check if a routine with the same room, day, and overlapping time exists
-    #     overlapping_routines = Routine.objects.filter(
-    #         room_number=room_number,
-    #         day=day,
-    #         time_start__lt=time_end,
-    #         time_end__gt=time_start
-    #     )
-
-        
-        
-
-        
-    #     teacher_names=request.POST.getlist('teacher')
-    #     # print(teacher_names)
-    #     # teacher_names = request.data.get('teacher', [])
-    #     # print(teacher_names)
-
-    #     # Convert teacher names to Teacher instances or IDs
-    #     teacher_instances = []
-    #     for teacher_name in teacher_names:
-    #         teacher_instance = get_object_or_404(Teacher, name=teacher_name)
-    #         teacher_instances.append(teacher_instance)
-
-    #     overlapping_routines_teacher = Routine.objects.none()
-    #     # Check if a routine with the same teacher, day, and overlapping time exists
-    #     for teacher_instance in teacher_instances:
-    #         overlapping_routines_teacher = Routine.objects.filter(
-    #             teacher=teacher_instance,
-    #             day=day,
-    #             time_start__lt=time_end,
-    #             time_end__gt=time_start
-    #         )
-
-        
-
-    #     if overlapping_routines_teacher.exists():
-    #         return Response(
-    #             {'error':'A routine with the same teacher, day, and overlapping time already exists.'},
-    #             status=status.HTTP_400_BAD_REQUEST
-    #         )
-        
-    #     elif overlapping_routines.exists():
-    #         return Response(
-    #             {
-    #                 'error': 'The room is already allocated to another teacher for the same day and time.'},
-    #             status=status.HTTP_400_BAD_REQUEST
-    #         )
-        
-    #     else:
-    #         serializer = self.get_serializer(data=data_copy)
-    #         serializer.is_valid(raise_exception=True)
-    #         self.perform_create(serializer)
-    #         headers = self.get_success_headers(serializer.data)
-
-    #         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
+ 
     def create(self, request, *args, **kwargs):
         teacher_names,season, starting_period_value, no_of_period_value, room_number, day = self.initialize_and_validate_input(request)
         period_time = self.get_period_time(season)
@@ -374,39 +275,6 @@ class RoutineViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-    # def update(self, request, *args, **kwargs):
-    #     instance = self.get_object()
-    #     serializer = self.get_serializer(instance, data=request.data, partial=True)
-    #     serializer.is_valid(raise_exception=True)
-
-    #     # Use the existing functions to initialize and validate input
-    #     teacher_names, season, starting_period_value, no_of_period_value, room_number, day = self.initialize_and_validate_input(request)
-
-    #     # Use the existing functions to get period time and calculate time range
-    #     period_time = self.get_period_time(season)
-    #     time_start, time_end = self.calculate_time_range(period_time, starting_period_value, no_of_period_value)
-        
-
-    #     # Use the existing functions to check overlapping routines
-    #     overlapping_routines = self.check_overlapping_routines(room_number, day, time_start, time_end, teacher_names, instance.id)
-    #     overlapping_routines_teacher = self.check_overlapping_routines_teacher(request.data, day, time_start, time_end, teacher_names, room_number, instance.id)
-
-    #     # Return an error response if there are overlapping routines
-    #     if overlapping_routines.exists():
-    #         return Response(
-    #             {'error': 'Updating the routine would cause an overlap with another routine.'},
-    #             status=status.HTTP_400_BAD_REQUEST
-    #         )
-    #     elif overlapping_routines_teacher.exists():
-    #         return Response(
-    #             {'error': 'Updating the routine would cause an overlap with another routine for the same teacher.'},
-    #             status=status.HTTP_400_BAD_REQUEST
-    #         )
-
-    #     # Perform the update if there are no overlapping routines
-    #     self.perform_update(serializer)
-    #     return Response(serializer.data)
-
 
 
     def update(self, request, *args, **kwargs):
@@ -416,8 +284,10 @@ class RoutineViewSet(viewsets.ModelViewSet):
         time_start, time_end = self.calculate_time_range(period_time, starting_period_value, no_of_period_value)
         data_copy = self.update_request_data(request.data, time_start, time_end)
 
-        overlapping_routines_teacher = self.check_overlapping_routines_teacher(data_copy, day, time_start, time_end, teacher_names, room_number)
-        overlapping_routines = self.check_overlapping_routines(room_number, day, time_start, time_end, teacher_names)
+        overlapping_routines_teacher = self.check_overlapping_routines_teacher(data_copy, day, time_start, time_end, teacher_names, room_number, current_routine_id=instance.id)
+        overlapping_routines = self.check_overlapping_routines(room_number, day, time_start, time_end, teacher_names, current_routine_id=instance.id)
+
+        
 
         if overlapping_routines_teacher.exists() and not overlapping_routines_teacher.filter(pk=instance.pk).exists():
             return Response(
