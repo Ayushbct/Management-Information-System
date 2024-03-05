@@ -264,10 +264,12 @@ class RoutineViewSet(viewsets.ModelViewSet):
         teacher_names,season, starting_period_value, no_of_period_value, room_number, day = self.initialize_and_validate_input(request)
         period_time = self.get_period_time(season)
         time_start, time_end = self.calculate_time_range(period_time, starting_period_value, no_of_period_value)
-        data_copy = self.update_request_data(request.data, time_start, time_end)
+        print(season)
+        data_copy = self.update_request_data(request.data, time_start, time_end,season)
 
-        overlapped_teachers,overlapping_routines_teacher = self.check_overlapping_routines_teacher(data_copy, day, time_start, time_end,teacher_names,room_number)
-        overlapping_routines=self.check_overlapping_routines(room_number, day, time_start, time_end,teacher_names)
+
+        overlapped_teachers,overlapping_routines_teacher = self.check_overlapping_routines_teacher(data_copy, day, time_start, time_end,teacher_names,room_number,season)
+        overlapping_routines=self.check_overlapping_routines(room_number, day, time_start, time_end,teacher_names,season)
         # print(overlapping_routines_teacher)
         # print(overlapping_routines)
         if overlapping_routines_teacher.exists():
@@ -304,10 +306,10 @@ class RoutineViewSet(viewsets.ModelViewSet):
         teacher_names, season, starting_period_value, no_of_period_value, room_number, day = self.initialize_and_validate_input(request)
         period_time = self.get_period_time(season)
         time_start, time_end = self.calculate_time_range(period_time, starting_period_value, no_of_period_value)
-        data_copy = self.update_request_data(request.data, time_start, time_end)
+        data_copy = self.update_request_data(request.data, time_start, time_end,season)
 
-        overlapped_teachers,overlapping_routines_teacher = self.check_overlapping_routines_teacher(data_copy, day, time_start, time_end, teacher_names, room_number, current_routine_id=instance.id)
-        overlapping_routines = self.check_overlapping_routines(room_number, day, time_start, time_end, teacher_names, current_routine_id=instance.id)
+        overlapped_teachers,overlapping_routines_teacher = self.check_overlapping_routines_teacher(data_copy, day, time_start, time_end, teacher_names, room_number,season, current_routine_id=instance.id)
+        overlapping_routines = self.check_overlapping_routines(room_number, day, time_start, time_end, teacher_names,season, current_routine_id=instance.id)
 
         
 
@@ -337,6 +339,14 @@ class RoutineViewSet(viewsets.ModelViewSet):
         season = request.data.get('season')
         starting_period_value = int(request.data.get('starting_period_value', 0))
         no_of_period_value = int(request.data.get('no_of_period_value', 0))
+        year_part = request.data.get('year_part')
+        if '2' in year_part:
+            season = "winter"
+        else :
+            # Handle other cases if necessary
+            season = "summer"  # Or handle the case when year_part doesn't contain '1'
+
+
 
         return teacher_names,season, starting_period_value, no_of_period_value, room_number, day
 
@@ -351,19 +361,21 @@ class RoutineViewSet(viewsets.ModelViewSet):
         time_end = period_time[starting_period_value + no_of_period_value - 1]
         return time_start, time_end
 
-    def update_request_data(self, data, time_start, time_end):
+    def update_request_data(self, data, time_start, time_end,season):
         data_copy = data.copy()
         data_copy['time_start'] = time_start
         data_copy['time_end'] = time_end
+        data_copy['season'] = season
         # print(data_copy)
         return data_copy
 
-    def check_overlapping_routines(self, room_number, day, time_start, time_end,teacher_names, current_routine_id=None):
+    def check_overlapping_routines(self, room_number, day, time_start, time_end,teacher_names,season, current_routine_id=None,):
         query = Routine.objects.filter(
             room_number=room_number,
             day=day,
             time_start__lt=time_end,
-            time_end__gt=time_start
+            time_end__gt=time_start,
+            season=season
         )
 
         if current_routine_id:
@@ -371,7 +383,7 @@ class RoutineViewSet(viewsets.ModelViewSet):
 
         return query
 
-    def check_overlapping_routines_teacher(self, data, day, time_start, time_end, teacher_names, room_number, current_routine_id=None):
+    def check_overlapping_routines_teacher(self, data, day, time_start, time_end, teacher_names, room_number,season, current_routine_id=None,):
         # print(teacher_names)
         teacher_instances = Teacher.objects.filter(name__in=teacher_names)
         # print("fjsdj")
@@ -389,6 +401,7 @@ class RoutineViewSet(viewsets.ModelViewSet):
                 day=day,
                 time_start__lt=time_end,
                 time_end__gt=time_start,
+                season=season
                 
             )
             # print("hello")
@@ -427,6 +440,7 @@ class RoutineViewSet(viewsets.ModelViewSet):
                 'room_number': routine.room_number,
                 "starting_period_value": routine.starting_period_value,
                 "no_of_period_value": routine.no_of_period_value,
+                "season":routine.season,
                 # Add other relevant parameters as needed
             }
             routines_info.append(routine_info)
