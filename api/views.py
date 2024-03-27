@@ -328,6 +328,7 @@ class RoutineViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     
+    
     def initialize_and_validate_input(self, request):
         # Add input validation logic here
         # For simplicity, assuming the input is valid
@@ -341,14 +342,16 @@ class RoutineViewSet(viewsets.ModelViewSet):
         no_of_period_value = int(request.data.get('no_of_period_value', 0))
         year_part = request.data.get('year_part')
         if '2' in year_part:
-            season = "winter"
-        else :
-            # Handle other cases if necessary
-            season = "summer"  # Or handle the case when year_part doesn't contain '1'
-
-
-
+            season= "winter"
+        else:
+            season= "summer"
+        
         return teacher_names,season, starting_period_value, no_of_period_value, room_number, day
+    
+    
+    
+        
+
 
     def get_period_time(self, season):
         winter_period_time = ['10:15', '11:00', '11:45', '12:30', '13:00', '13:45', '14:30', '15:15', '16:00', '16:45', '17:30']
@@ -501,6 +504,26 @@ class RoutineViewSet(viewsets.ModelViewSet):
         )
 
 
+    # For example: /api/routines/get_routines_by_teacher_and_year_part/?teacher_id=1&year_part=2
+    @action(detail=False, methods=['GET'])
+    def get_routines_by_teacher_and_year_part(self, request):
+        teacher_id = request.query_params.get('teacher_id')
+        year_part = request.query_params.get('year_part')
+        if '2' in year_part:
+            season= "winter"
+        else:
+            season= "summer"
+
+        routines = Routine.objects.filter(
+            teacher=teacher_id,
+            season=season
+        )
+
+        serializer = self.get_serializer(routines, many=True)
+        return Response(serializer.data)
+
+
+
     # For example: /api/routines/get_routines_by_teacher_and_room/?teacher_id=1&room_number=101
     @action(detail=False, methods=['GET'])
     def get_routines_by_teacher_and_room(self, request):
@@ -508,12 +531,15 @@ class RoutineViewSet(viewsets.ModelViewSet):
         room_number = request.query_params.get('room_number')
 
         routines = Routine.objects.filter(
-            teacher_id=teacher_id,
+            teacher=teacher_id,
             room_number=room_number
         )
 
         serializer = self.get_serializer(routines, many=True)
         return Response(serializer.data)
+
+
+    
 
     @action(detail=False, methods=['GET'])
     def get_routines_by_Year_and_section(self, request):
