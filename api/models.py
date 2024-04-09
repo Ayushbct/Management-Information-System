@@ -185,6 +185,7 @@ class Routine(models.Model):
     year_part=models.CharField(max_length=10,blank=True)
     section=models.CharField(max_length=10,blank=True,null=True)
     note=models.CharField(max_length=10,blank=True,null=True)
+    alternate_bool = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.year} - {self.subject} - {self.day} {self.time_start}-{self.time_end} ({self.session_type})"
