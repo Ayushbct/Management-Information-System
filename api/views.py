@@ -504,10 +504,10 @@ class RoutineViewSet(viewsets.ModelViewSet):
         )
 
 
-    # For example: /api/routines/get_alternate_routines_by_year_part_year_id_course_id_and_section/?year_id=1&year_part=2&course_id=1&section=AB
+    # For example: /api/routines/get_alternate_routines_by_year_part_year_id_course_id_and_section/?year_id=1&year_part=2&course_id=1&section=AB&alternate=true
     @action(detail=False, methods=['GET'])
     def get_alternate_routines_by_year_part_year_id_course_id_and_section(self, request):
-        # alternate = request.query_params.get('alternate')
+        alternate_bool = request.query_params.get('alternate')
         course_id = request.query_params.get('course_id')
         year_id = request.query_params.get('year_id')
         year_part = request.query_params.get('year_part')
@@ -517,7 +517,7 @@ class RoutineViewSet(viewsets.ModelViewSet):
             season= "winter"
         else:
             season= "summer"
-        alternate_bool=True
+        # alternate_bool=True
 
         routines = Routine.objects.filter(
             alternate_bool=alternate_bool,
