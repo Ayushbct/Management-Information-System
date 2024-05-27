@@ -169,6 +169,11 @@ class Routine(models.Model):
         ('summer', 'Summer'),
         
     ]
+    SHIFT_CHOICES = [
+        ('morning', 'Morning'),
+        ('day', 'Day'),
+        
+    ]
 
     day = models.CharField(max_length=3, choices=DAY_CHOICES)
     time_start = models.TimeField(blank=True,null=True)
@@ -180,6 +185,7 @@ class Routine(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     room_number = models.CharField(max_length=50,blank=True)
     season=models.CharField(max_length=10, choices=SEASON_CHOICES,default="summer")
+    shift=models.CharField(max_length=10, choices=SHIFT_CHOICES,default="day")
     starting_period_value=models.CharField(max_length=10,blank=True)
     no_of_period_value=models.CharField(max_length=10,blank=True)
     year_part=models.CharField(max_length=10,blank=True)
