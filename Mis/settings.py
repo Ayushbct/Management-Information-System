@@ -55,9 +55,13 @@ INSTALLED_APPS = [
     
 ]
 
+
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:5173",
 ]
+
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
@@ -222,10 +226,6 @@ SIMPLE_JWT = {
 
 PASSWORD_RESET_TIMEOUT = 900
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:5173",
-]
+
 
 
